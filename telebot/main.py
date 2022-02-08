@@ -9,7 +9,7 @@ from core.function import *
 from core.token import *
 
 
-WEBHOOK_HOST = "172.31.23.194"
+WEBHOOK_HOST = "18.192.121.96"
 WEBHOOK_PORT = 443
 WEBHOOK_LISTEN = "0.0.0.0"
 WEBHOOK_SSL_CERT = './webhook_cert.pem'
