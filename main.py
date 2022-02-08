@@ -27,6 +27,7 @@ def default(update: Update, content: CallbackContext):
     funcs = {
         "/start": start,
         "/help": usage,
+        "/version": version,
     }
     funcs[update.message.text](update, content)
 
@@ -41,9 +42,11 @@ def send_video(update: Update, content: CallbackContext):
 dispatcher = bot.dispatcher
 start_handler = CommandHandler('start', default, run_async=True)
 usage_handler = CommandHandler('help', default, run_async=True)
+version_handler = CommandHandler('version', default, run_async=True)
 video_handler = MessageHandler(Filters.text & (~Filters.command), send_video, run_async=True)
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(usage_handler)
+dispatcher.add_handler(version_handler)
 dispatcher.add_handler(video_handler)
 
 bot.start_polling()
