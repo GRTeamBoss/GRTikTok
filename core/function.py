@@ -26,16 +26,17 @@ def download_video_from_share_link(URI: str, update, content) -> any:
     __page = requests.get(URI, headers={"User-Agent": UA_CHROME})
     if __page.status_code == 200:
         __file_content = __page.text
+        del __page
         try:
             __video_tag = re.findall(r'src="https://v[\w\S]+="', __file_content)[0][5:-1]
         except Exception:
             __video_tag = re.findall(r'"downloadAddr":"[\w\S]+="', __file_content)[0][16:-1]
-        __URL = __video_tag
-        __URL_decode = "".join("/".join(__URL.split("\\u002F")).split("amp;"))
+        __URL_decode = "".join("/".join(__video_tag.split("\\u002F")).split("amp;"))
         content.bot.send_message(chat_id=update.message.chat.id, text=f"Parsed URI: {__URL_decode}")
         time.sleep(1)
         content.bot.send_message(chat_id=update.message.chat.id, text="Video downloading...")
         __file = requests.get(__URL_decode, headers={"User-Agent": UA_CHROME})
+        del __URL_decode
     else:
         __file = __page
     return __file
@@ -70,5 +71,7 @@ def download_video(update,content) -> None:
             if __file.status_code == 200:
                 content.bot.send_message(update.message.chat.id, "Success!")
                 content.bot.send_video(update.message.chat.id, __file.content)
+                del __file
             else:
+                del __file
                 content.bot.send_message(chat_id=update.message.chat.id, text=f"Error!\nstatus code: {__file.status_code}")
