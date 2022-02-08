@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-import re, os
+import re, os, time
 
+import requests
 import telebot
 from flask import Flask, request
 from pyngrok import ngrok
@@ -52,5 +53,11 @@ def webhook():
         bot.set_webhook(url=https_tunnel)
         return "webhook", 200
 
+
+def start_bot():
+    requests.get("http:localhost:5000")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+    time.sleep(1)
+    start_bot()
