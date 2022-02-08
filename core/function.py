@@ -21,7 +21,7 @@ def version(update, content) -> None:
     content.bot.send_message(chat_id=update.message.chat.id, text=info)
 
 
-def download_video_from_share_link(URI: str) -> any:
+def download_video_from_share_link(URI: str, update, content) -> any:
     time.sleep(1)
     __page = requests.get(URI, headers={"User-Agent": UA_CHROME})
     if __page.status_code == 200:
@@ -32,7 +32,9 @@ def download_video_from_share_link(URI: str) -> any:
             __video_tag = re.findall(r'"downloadAddr":"[\w\S]+="', __file_content)[0][16:-1]
         __URL = __video_tag
         __URL_decode = "".join("/".join(__URL.split("\\u002F")).split("amp;"))
+        content.bot.send_message(chat_id=update.message.chat.id, text=f"Parsed URI: {__URL_decode}")
         time.sleep(1)
+        content.bot.send_message(chat_id=update.message.chat.id, text="Video downloading...")
         __file = requests.get(__URL_decode, headers={"User-Agent": UA_CHROME})
     else:
         __file = __page
@@ -54,11 +56,12 @@ def download_video(update,content) -> None:
             PC_VIDEO = True
     finally:
         if update.message.text == __mobile_link:
-            __file = download_video_from_share_link(__mobile_link)
+            __file = download_video_from_share_link(__mobile_link, update, content)
         elif PC_VIDEO is True and update.message.text == __usual_link:
-            __file = download_video_from_share_link(__usual_link)
+            __file = download_video_from_share_link(__usual_link, update, content)
         elif PC_VIDEO is False and update.message.text == __usual_link:
             time.sleep(1)
+            content.bot.send_message(chat_id=update.message.chat.id, text="Video downloading...")
             __file = requests.get(update.message.text)
         else:
             __file = False
