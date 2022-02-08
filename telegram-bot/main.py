@@ -4,7 +4,6 @@
 import re, os
 
 import logging
-import webbrowser
 import cherrypy
 from telegram import Update
 from telegram.ext import CommandHandler, CallbackContext, MessageHandler, Filters, Updater
@@ -16,14 +15,7 @@ logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 TOKEN = "5293683737:AAFDZVtnkCaqoBhwKzco6jZllFInith3Dy0"
 
-WEBHOOK_HOST = "172.31.23.194"
-WEBHOOK_PORT = 443
-WEBHOOK_LISTEN = "0.0.0.0"
-WEBHOOK_SSL_CERT = './webhook_cert.pem'
-WEBHOOK_SSL_PRIV = './webhook_pkey.pem'
-
-WEBHOOK_URL_BASE = f"https://{WEBHOOK_HOST}:{WEBHOOK_PORT}"
-WEBHOOK_URL_PATH = f"/{TOKEN}/"
+PORT = int(os.environ.get('PORT', 5000))
 
 
 class WebhookServer(object):
@@ -60,7 +52,7 @@ def default(update: Update, content: CallbackContext):
     funcs[update.message.text](update, content)
 
 
-def send_video(update: Update, content: CallbackContext):
+def send_video(update, content):
     status = is_link(update)
     if status is True:
         download_video(update, content)
@@ -87,16 +79,8 @@ def main():
     dispatcher.add_handler(video_handler)
     dispatcher.add_error_handler(error)
 
-    cherrypy.config.update({
-        'server.socket_host': WEBHOOK_LISTEN,
-        'server.socket_port': WEBHOOK_PORT,
-        'server.ssl_module': 'builtin',
-        'server.ssl_certificate': WEBHOOK_SSL_CERT,
-        'server.ssl_private_key': WEBHOOK_SSL_PRIV
-    })
-
-    bot.start_webhook(url_path=WEBHOOK_URL_BASE+WEBHOOK_URL_PATH, cert=open(WEBHOOK_SSL_CERT, "r"))
-    cherrypy.quickstart(WebhookServer(), WEBHOOK_URL_PATH, {"/": {}})
+    bot.start_webhook(listen="0.0.0.0", port=int(PORT), url_path=TOKEN)
+    bot.bot.set_webhook('https://rocky-shore-11854.herokuapp.com/'+TOKEN)
     bot.idle()
 
 

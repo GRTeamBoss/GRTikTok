@@ -70,7 +70,7 @@ def download_video(update,content) -> None:
         if __file:
             if __file.status_code == 200:
                 content.bot.send_message(update.message.chat.id, "Success!")
-                content.bot.send_video(update.message.chat.id, __file.content)
+                content.bot.send_video(chat_id=update.message.chat.id, video=__file.content)
                 del __file
             else:
                 del __file
