@@ -42,18 +42,18 @@ def send_video(message):
 
 
 @app.route("/"+TOKEN, methods=["POST"])
-def get_update():
+def get_update(request):
     json_string = request.get_data().decode("utf-8")
     update = Update.de_json(json_string)
     bot.process_new_updates([update])
-    return '', 200
+    return ''
 
 
 @app.route("/")
-def webhook():
+def webhook(request):
     bot.remove_webhook()
     bot.set_webhook(url=APP_URL)
-    return "", 200
+    return ""
 
 
 if __name__ == "__main__":
