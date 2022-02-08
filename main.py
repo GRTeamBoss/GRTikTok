@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-import re, os
-import logging
+import re, os, logging, time
 
 import telebot
+import flask
 from flask import Flask, request
-from telebot.types import Update
 
 from core.function import *
 from core.token import bot, TOKEN
@@ -14,7 +13,20 @@ from core.token import bot, TOKEN
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
-APP_URL = "https://grtiktok.herokuapp.com/"+TOKEN
+
+
+__webhook_host = '18.192.121.96'
+__webhook_port = 8443
+__webhook_listen = '0.0.0.0'
+
+__webhook_cert = ''
+__webhook_priv = ''
+
+__webhook_base = f'https://{__webhook_host}:{__webhook_port}'
+__webhook_path = f'/{TOKEN}/'
+
+logger = telebot.logger
+telebot.logger.setLevel(logging.INFO)
 
 def is_link(message):
     try:
@@ -27,7 +39,7 @@ def is_link(message):
     except Exception:
         return False
 
-
+@bot.message_handler(commands=["start", "help", "version"])
 def default(message):
     funcs = {
         "/start": start,
@@ -42,24 +54,25 @@ def send_video(message):
     download_video(message)
 
 
-@app.route("/"+TOKEN, methods=["POST"])
-def getMessage():
-    json_string = request.get_data().decode("utf-8")
-    update = Update.de_json(json_string)
-    bot.process_new_updates([update])
-    return "<h1>Work</h1>", 200
+@app.route("/", methods=["GET", "HEAD"])
+def index():
+    return ''
 
-@app.route("/")
+
+@app.route(__webhook_path, methods=["POST"])
 def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url=APP_URL)
-    return "<h1>Webhook</h1>", 200
-if __name__ == "__main__":
-    if "Heroku" in list(os.environ.keys()):
-        PORT = int(os.environ.get('PORT', 5000))
-        logger = telebot.logger
-        telebot.logger.setLevel(logging.INFO)
-        app.run(host="0.0.0.0", port=PORT)
+    if request.headers.get('content-type') == "application/json":
+        json_string = request.get_data().decode("utf-8")
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return "<h1>Work</h1>"
     else:
-        bot.remove_webhook()
-        bot.polling(non_stop=True)
+        flask.abort(403)
+
+
+bot.remove_webhook()
+
+time.sleep(.5)
+bot.set_webhook(url=__webhook_base+__webhook_path, certificate=open(__webhook_cert, "r"))
+
+app.run(host=__webhook_listen, port=__webhook_port, ssl_context=(__webhook_cert, __webhook_priv), debug=True)
