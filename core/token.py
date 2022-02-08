@@ -1,5 +1,5 @@
-from telebot import TeleBot
+from telegram.ext import Updater
 
 
 TOKEN = "5293683737:AAFDZVtnkCaqoBhwKzco6jZllFInith3Dy0"
-bot = TeleBot(TOKEN, parse_mode=None)
+bot = Updater(TOKEN, use_context=True)
