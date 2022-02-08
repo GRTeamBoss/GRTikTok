@@ -1,32 +1,17 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-import re, os, logging, time
+import re, os
 
 import telebot
-import flask
 from flask import Flask, request
 
 from core.function import *
 from core.token import bot, TOKEN
 
-
+HEROKU_API = "https://grtiktok.herokuapp.com/"+TOKEN
 app = Flask(__name__)
 app.secret_key = "super secret key"
-
-
-__webhook_host = '18.192.121.96'
-__webhook_port = 8443
-__webhook_listen = '0.0.0.0'
-
-__webhook_cert = 'webhook_cert.pem'
-__webhook_priv = 'webhook_pkey.pem'
-
-__webhook_base = f'https://{__webhook_host}:{__webhook_port}'
-__webhook_path = f'/{TOKEN}/'
-
-logger = telebot.logger
-telebot.logger.setLevel(logging.INFO)
 
 def is_link(message):
     try:
@@ -54,25 +39,17 @@ def send_video(message):
     download_video(message)
 
 
-@app.route("/", methods=["GET", "HEAD"])
-def index():
-    return ''
+@app.route("/"+TOKEN, methods=["POST"])
+def getMessage():
+    bot.process_new_updates([telebot.types.Update.de_json(request.get_data().decode("utf-8"))])
+    return '!', 200
 
 
-@app.route(__webhook_path, methods=["POST"])
+@app.route("/")
 def webhook():
-    if request.headers.get('content-type') == "application/json":
-        json_string = request.get_data().decode("utf-8")
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return "<h1>Work</h1>"
-    else:
-        flask.abort(403)
+    bot.remove_webhook()
+    bot.set_webhook(url=HEROKU_API)
+    return "!", 200
 
-
-bot.remove_webhook()
-
-time.sleep(.5)
-bot.set_webhook(url=__webhook_base+__webhook_path, certificate=open(__webhook_cert, "r"))
-
-app.run(host=__webhook_listen, port=__webhook_port, ssl_context=(__webhook_cert, __webhook_priv), debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000))))
