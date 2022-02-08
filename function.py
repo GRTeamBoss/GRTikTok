@@ -2,7 +2,7 @@ import re, time
 
 import requests
 
-from core.token import bot
+from .token import bot
 
 
 UA_CHROME = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36"
@@ -72,7 +72,7 @@ def download_video(message) -> None:
         if __file:
             if __file.status_code == 200:
                 bot.send_message(message.chat.id, "Success!")
-                bot.send_video(message.chat.id, __file.content)
+                bot.send_video(chat_id=message.chat.id, video=__file.content)
                 del __file
             else:
                 del __file

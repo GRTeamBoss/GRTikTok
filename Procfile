@@ -1,1 +1,1 @@
-web: python3 telegram-bot/main.py
+web: python3 main.py
