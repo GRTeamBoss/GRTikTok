@@ -24,11 +24,9 @@ def version(message) -> None:
 
 
 def download_video_from_share_link(URI: str, message) -> any:
-    time.sleep(1)
     __page = requests.get(URI, headers={"User-Agent": UA_CHROME})
     if __page.status_code == 200:
         __file_content = __page.text
-        del __page
         try:
             __video_tag = re.findall(r'src="https://v[\w\S]+="', __file_content)[0][5:-1]
         except Exception:
@@ -38,7 +36,6 @@ def download_video_from_share_link(URI: str, message) -> any:
         time.sleep(1)
         bot.send_message(chat_id=message.chat.id, text="Video downloading...")
         __file = requests.get(__URL_decode, headers={"User-Agent": UA_CHROME})
-        del __URL_decode
     else:
         __file = __page
     return __file
@@ -54,16 +51,16 @@ def download_video(message) -> None:
     except Exception:
         try:
             __usual_link = re.findall(r"https://v[\d]+[\w\W\s\S]+", message.text)[0]
-        except:
+        except Exception:
             __usual_link = re.findall(r"https://www.tiktok.com/@[\w\S]+", message.text)[0]
             PC_VIDEO = True
     finally:
+        time.sleep(1)
         if message.text == __mobile_link:
             __file = download_video_from_share_link(__mobile_link, message)
         elif PC_VIDEO is True and message.text == __usual_link:
             __file = download_video_from_share_link(__usual_link, message)
         elif PC_VIDEO is False and message.text == __usual_link:
-            time.sleep(1)
             bot.send_message(chat_id=message.chat.id, text="Video downloading...")
             __file = requests.get(message.text)
         else:
@@ -73,7 +70,5 @@ def download_video(message) -> None:
             if __file.status_code == 200:
                 bot.send_message(message.chat.id, "Success!")
                 bot.send_video(chat_id=message.chat.id, video=__file.content)
-                del __file
             else:
-                del __file
                 bot.send_message(chat_id=message.chat.id, text=f"Error!\nstatus code: {__file.status_code}")

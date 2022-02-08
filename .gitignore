@@ -1,4 +1,5 @@
 *.code-workspace
 .vscode/
-**/__pycache/
+**/__pycache__/*
 .svn
+wsgi.py

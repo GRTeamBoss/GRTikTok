@@ -5,11 +5,12 @@ import re, os
 
 import telebot
 from flask import Flask, request
+from pyngrok import ngrok
 
 from core.function import *
-from core.token import bot, TOKEN
+from core.token import bot
 
-HEROKU_API = "https://grtiktok.herokuapp.com/"+TOKEN
+
 app = Flask(__name__)
 app.secret_key = "super secret key"
 
@@ -39,17 +40,17 @@ def send_video(message):
     download_video(message)
 
 
-@app.route("/"+TOKEN, methods=["POST"])
-def getMessage():
-    bot.process_new_updates([telebot.types.Update.de_json(request.get_data().decode("utf-8"))])
-    return '!', 200
-
-
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url=HEROKU_API)
-    return "!", 200
+    if request.method=="POST":
+        bot.process_new_updates([telebot.types.Update.de_json(request.get_data().decode("utf-8"))])
+        return 'message', 200
+    else:
+        bot.remove_webhook()
+        http_tunnel = ngrok.connect(5000)
+        https_tunnel = "https:"+http_tunnel.public_url.split(":")[1]
+        bot.set_webhook(url=https_tunnel)
+        return "webhook", 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000))))
+    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
