@@ -19,8 +19,8 @@ __webhook_host = '18.192.121.96'
 __webhook_port = 8443
 __webhook_listen = '0.0.0.0'
 
-__webhook_cert = ''
-__webhook_priv = ''
+__webhook_cert = 'webhook_cert.pem'
+__webhook_priv = 'webhook_pkey.pem'
 
 __webhook_base = f'https://{__webhook_host}:{__webhook_port}'
 __webhook_path = f'/{TOKEN}/'
